@@ -5,8 +5,6 @@ import { RecommendDto } from '../dto/recommend.dto';
 
 @Injectable()
 export class PromptService {
-  // backend/src/recommend/rag/prompt.service.ts
-
   buildRefineQueryPrompt(
     firstDocs: Array<Document<Record<string, any>>>,
     grade: string,
