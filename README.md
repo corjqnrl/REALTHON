@@ -1,11 +1,10 @@
-# REALTHON
-
 <div>
   <h1>Coursefit</h1>
-  <img src="https://github.com/EFUB-SWS-Rudolph/Frontend/blob/b75afe13e17af5302514e2b89d6d6b5feba1386b/sws/src/common/assets/images/weevoImg.png" alt="weevoImage" width="600" />
+  <img src="https://github.com/EFUB-SWS-Rudolph/Frontend/blob/b75afe13e17af5302514e2b89d6d6b5feba1386b/sws/src/common/assets/images/weevoImg.png" alt="coursefitImage" width="600" />
   <br />
 
-  <a href="https://weevo.netlify.app">Coursefit Link</a>
+<a href="https://weevo.netlify.app">Coursefit Link</a>
+
 </div>
 
 <br />
@@ -19,6 +18,7 @@ Coursefit은 사용자가 자신이 수강한 과목과 그 성적에 기반하�
 <br />
 
 ## 🪄 주요 기능
+
 - 성적표 이미지 업로드 및 과목/성적 자동 인식📄
 - 전공/교양 강의 중 추천받고 싶은 유형 선택✔️
 - 강의계획서, 강의평 기반 개개인의 성적과 분야에 맞는 강의 추천 및 추천 이유 제공📝
