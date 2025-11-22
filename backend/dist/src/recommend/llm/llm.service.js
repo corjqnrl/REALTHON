@@ -8,24 +8,33 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PrismaService = void 0;
+exports.LLMService = void 0;
 const common_1 = require("@nestjs/common");
-const client_1 = require("@prisma/client");
-let PrismaService = class PrismaService extends client_1.PrismaClient {
+const openai_1 = __importDefault(require("openai"));
+let LLMService = class LLMService {
     constructor() {
-        super();
+        this.client = new openai_1.default({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
     }
-    async onModuleInit() {
-        await this.$connect();
-    }
-    async onModuleDestroy() {
-        await this.$disconnect();
+    async ask(prompt) {
+        const res = await this.client.chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+                { role: 'system', content: '당신은 강의 추천 AI입니다.' },
+                { role: 'user', content: prompt },
+            ],
+        });
+        return res.choices[0].message['content'];
     }
 };
-exports.PrismaService = PrismaService;
-exports.PrismaService = PrismaService = __decorate([
+exports.LLMService = LLMService;
+exports.LLMService = LLMService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], PrismaService);
-//# sourceMappingURL=prisma.service.js.map
+], LLMService);
+//# sourceMappingURL=llm.service.js.map

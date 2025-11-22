@@ -10,6 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // =======================
@@ -36,6 +37,11 @@ enum Grade {
   P
 }
 
+enum Category {
+  Major
+  General
+}
+
 // =======================
 // Academic structure
 // =======================
@@ -56,6 +62,7 @@ model Course {
   courseCode   String // 학수번호 (e.g. "CS101")
   title        String
   grade        Grade
+  category     Category   @default(General)
 
   @@unique([departmentId, courseCode])
 }

@@ -7,11 +7,11 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Category, Grade } from '@prisma/client';
 import { MulterFile } from '../common/types/multer.types';
 import { CourseService } from './course.service';
 import { RecommendDto } from './dto/recommend.dto';
 import { RecommendService } from './recommend.service';
-import { Grade } from '@prisma/client';
 
 @Controller('recommend')
 export class RecommendController {
@@ -35,6 +35,7 @@ export class RecommendController {
       title: string;
       courseCode: string;
       grade: Grade;
+      category: Category;
     }>;
   }> {
     if (!file) {

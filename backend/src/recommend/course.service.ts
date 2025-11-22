@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { Grade } from '@prisma/client';
+import { Category, Grade } from '@prisma/client';
 import { MulterFile } from '../common/types/multer.types';
 import { OpenAIService } from '../openai/openai.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -12,6 +12,22 @@ export class CourseService {
     private readonly openaiService: OpenAIService,
     private readonly prisma: PrismaService,
   ) {}
+
+  /**
+   * Category 문자열을 Prisma Category enum으로 변환
+   * @param category "General" 또는 "Major" (또는 "교양" → "General")
+   * @returns Category enum 값
+   */
+  convertCategoryToEnum(category: string): Category {
+    const normalizedCategory = category.trim();
+
+    // "교양" 또는 "General"이면 General, 나머지는 Major
+    if (normalizedCategory === 'General' || normalizedCategory === '교양') {
+      return Category.General;
+    }
+
+    return Category.Major;
+  }
 
   /**
    * Grade 문자열을 Prisma Grade enum으로 변환
@@ -131,11 +147,15 @@ export class CourseService {
       title: string;
       courseCode: string;
       grade: Grade;
+      category: Category;
     }> = [];
     for (const extracted of extractedCourses) {
       try {
         // Grade 변환
         const gradeEnum = this.convertGradeToEnum(extracted.grade);
+
+        // Category 변환
+        const categoryEnum = this.convertCategoryToEnum(extracted.category);
 
         // Department 코드 추출
         const deptCode = this.extractDepartmentFromCode(extracted.courseCode);
@@ -154,12 +174,14 @@ export class CourseService {
           update: {
             title: extracted.title,
             grade: gradeEnum,
+            category: categoryEnum,
           },
           create: {
             departmentId,
             courseCode: extracted.courseCode,
             title: extracted.title,
             grade: gradeEnum,
+            category: categoryEnum,
           },
         });
 

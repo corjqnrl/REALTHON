@@ -17,9 +17,8 @@ exports.OpenAIService = void 0;
 const common_1 = require("@nestjs/common");
 const openai_1 = __importDefault(require("openai"));
 let OpenAIService = OpenAIService_1 = class OpenAIService {
-    logger = new common_1.Logger(OpenAIService_1.name);
-    openai;
     constructor() {
+        this.logger = new common_1.Logger(OpenAIService_1.name);
         const apiKey = process.env.OPENAI_API_KEY;
         if (!apiKey) {
             this.logger.warn('OPENAI_API_KEY가 설정되지 않았습니다. OpenAI 기능을 사용할 수 없습니다.');
@@ -147,6 +146,119 @@ lectureDays는 항상 문자열 배열로 반환해주세요 (단일 요일이�
         catch (error) {
             this.logger.error('OpenAI API 호출 실패:', error);
             throw new Error(`시간표 정보 추출 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+        }
+    }
+    async extractTranscriptInfo(imageBuffer, mimeType) {
+        if (!process.env.OPENAI_API_KEY) {
+            throw new Error('OPENAI_API_KEY가 설정되지 않았습니다.');
+        }
+        try {
+            const base64Image = imageBuffer.toString('base64');
+            const response = await this.openai.chat.completions.create({
+                model: 'gpt-4o',
+                messages: [
+                    {
+                        role: 'user',
+                        content: [
+                            {
+                                type: 'text',
+                                text: `이 성적표 이미지를 분석해서 다음 정보를 JSON 형식으로 추출해주세요:
+- 과목명 (title): 강의 과목 이름
+- 학수번호 (courseCode): 학수번호 (예: "CS101", "MATH201")
+- 성적 (grade): 성적 (A+, A, B+, B, C+, C, D+, D, F, P 중 하나)
+- 전공/교양 여부 (category): 교양이라고 써있으면 General, 나머지는 모두 Major
+
+중요 사항:
+- 성적은 반드시 다음 형식 중 하나로 반환해주세요: A+, A, B+, B, C+, C, D+, D, F, P
+- 학수번호는 숫자와 영문자로 구성된 코드입니다 (예: "CS101", "MATH201", "ENG101")
+- 성적표에 있는 모든 과목을 정확하게 추출해주세요.
+
+응답은 반드시 다음 형식의 JSON 객체로 반환해주세요 (courses 키에 배열 포함):
+{
+  "courses": [
+    {
+      "title": "과목명",
+      "courseCode": "CS101",
+      "grade": "A+",
+      "category": "General"
+    },
+    {
+      "title": "과목명",
+      "courseCode": "MATH201",
+      "grade": "B",
+      "category": "Major"
+    }
+  ]
+}
+
+성적표에 있는 모든 과목을 정확하게 추출해주세요.`,
+                            },
+                            {
+                                type: 'image_url',
+                                image_url: {
+                                    url: `data:${mimeType};base64,${base64Image}`,
+                                },
+                            },
+                        ],
+                    },
+                ],
+                max_tokens: 2000,
+                response_format: { type: 'json_object' },
+            });
+            const content = response.choices[0]?.message?.content;
+            if (!content) {
+                throw new Error('OpenAI API 응답이 비어있습니다.');
+            }
+            let parsed;
+            try {
+                parsed = JSON.parse(content);
+            }
+            catch {
+                throw new Error('JSON 파싱 실패');
+            }
+            const isTranscriptResponse = (obj) => {
+                return (typeof obj === 'object' &&
+                    obj !== null &&
+                    ('courses' in obj || Array.isArray(obj)));
+            };
+            if (!isTranscriptResponse(parsed)) {
+                throw new Error('응답 형식이 올바르지 않습니다.');
+            }
+            let courses = [];
+            if (Array.isArray(parsed.courses)) {
+                courses = parsed.courses;
+            }
+            else if (Array.isArray(parsed)) {
+                courses = parsed;
+            }
+            else {
+                throw new Error('응답에 courses 배열이 없습니다.');
+            }
+            const isValidCourse = (obj) => {
+                return (typeof obj === 'object' &&
+                    obj !== null &&
+                    ('title' in obj || 'courseCode' in obj || 'grade' in obj));
+            };
+            return courses.filter(isValidCourse).map((course) => {
+                let category = 'Major';
+                if (typeof course.category === 'string') {
+                    const normalizedCategory = course.category.trim();
+                    if (normalizedCategory === 'General' ||
+                        normalizedCategory === '교양') {
+                        category = 'General';
+                    }
+                }
+                return {
+                    title: typeof course.title === 'string' ? course.title : '',
+                    courseCode: typeof course.courseCode === 'string' ? course.courseCode : '',
+                    grade: typeof course.grade === 'string' ? course.grade : '',
+                    category,
+                };
+            });
+        }
+        catch (error) {
+            this.logger.error('OpenAI API 호출 실패:', error);
+            throw new Error(`성적표 정보 추출 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
         }
     }
 };

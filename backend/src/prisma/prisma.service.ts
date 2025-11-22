@@ -1,7 +1,7 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
-import { Pool } from 'pg';
+// import { PrismaPg } from '@prisma/adapter-pg'; // 제거
+// import { Pool } from 'pg'; // 제거
 
 @Injectable()
 export class PrismaService
@@ -9,15 +9,8 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor() {
-    const connectionString = process.env.DATABASE_URL;
-    if (!connectionString) {
-      throw new Error('DATABASE_URL environment variable is not set');
-    }
-
-    const pool = new Pool({ connectionString });
-    const adapter = new PrismaPg(pool);
-
-    super({ adapter });
+    // Prisma 6에서는 adapter 없이 그냥 super()만 호출
+    super();
   }
 
   async onModuleInit() {

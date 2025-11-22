@@ -13,6 +13,7 @@ export interface ExtractedCourse {
   title: string;
   courseCode: string;
   grade: string; // "A+", "A", "B+", "B", "C+", "C", "D+", "D", "F", "P"
+  category: string; // "General" or "Major"
 }
 
 interface OpenAILectureResponse {
@@ -31,6 +32,7 @@ interface OpenAICourseResponse {
   title?: string;
   courseCode?: string;
   grade?: string;
+  category?: string;
 }
 
 interface OpenAITranscriptResponse {
@@ -229,6 +231,7 @@ lectureDays는 항상 문자열 배열로 반환해주세요 (단일 요일이�
 - 과목명 (title): 강의 과목 이름
 - 학수번호 (courseCode): 학수번호 (예: "CS101", "MATH201")
 - 성적 (grade): 성적 (A+, A, B+, B, C+, C, D+, D, F, P 중 하나)
+- 전공/교양 여부 (category): 교양이라고 써있으면 General, 나머지는 모두 Major
 
 중요 사항:
 - 성적은 반드시 다음 형식 중 하나로 반환해주세요: A+, A, B+, B, C+, C, D+, D, F, P
@@ -241,12 +244,14 @@ lectureDays는 항상 문자열 배열로 반환해주세요 (단일 요일이�
     {
       "title": "과목명",
       "courseCode": "CS101",
-      "grade": "A+"
+      "grade": "A+",
+      "category": "General"
     },
     {
       "title": "과목명",
       "courseCode": "MATH201",
-      "grade": "B"
+      "grade": "B",
+      "category": "Major"
     }
   ]
 }
@@ -314,11 +319,24 @@ lectureDays는 항상 문자열 배열로 반환해주세요 (단일 요일이�
       };
 
       return courses.filter(isValidCourse).map((course): ExtractedCourse => {
+        // category가 없거나 유효하지 않으면 기본값으로 "Major" 사용
+        let category = 'Major';
+        if (typeof course.category === 'string') {
+          const normalizedCategory = course.category.trim();
+          if (
+            normalizedCategory === 'General' ||
+            normalizedCategory === '교양'
+          ) {
+            category = 'General';
+          }
+        }
+
         return {
           title: typeof course.title === 'string' ? course.title : '',
           courseCode:
             typeof course.courseCode === 'string' ? course.courseCode : '',
           grade: typeof course.grade === 'string' ? course.grade : '',
+          category,
         };
       });
     } catch (error) {

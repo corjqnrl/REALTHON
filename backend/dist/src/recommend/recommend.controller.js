@@ -12,33 +12,46 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TimeTableController = void 0;
+exports.RecommendController = void 0;
 const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
-const time_table_service_1 = require("./time-table.service");
-let TimeTableController = class TimeTableController {
-    timeTableService;
-    constructor(timeTableService) {
-        this.timeTableService = timeTableService;
+const course_service_1 = require("./course.service");
+const recommend_dto_1 = require("./dto/recommend.dto");
+const recommend_service_1 = require("./recommend.service");
+let RecommendController = class RecommendController {
+    constructor(service, courseService) {
+        this.service = service;
+        this.courseService = courseService;
     }
-    async uploadTimeTableImage(file) {
+    async getRecommendation(dto) {
+        return await this.service.recommend(dto);
+    }
+    async uploadTranscript(file) {
         if (!file) {
             throw new common_1.BadRequestException('파일이 제공되지 않았습니다.');
         }
-        return await this.timeTableService.uploadTimeTableImage(file);
+        return await this.courseService.uploadTranscript(file);
     }
 };
-exports.TimeTableController = TimeTableController;
+exports.RecommendController = RecommendController;
 __decorate([
-    (0, common_1.Post)('upload'),
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [recommend_dto_1.RecommendDto]),
+    __metadata("design:returntype", Promise)
+], RecommendController.prototype, "getRecommendation", null);
+__decorate([
+    (0, common_1.Post)('course/upload'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('image')),
     __param(0, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], TimeTableController.prototype, "uploadTimeTableImage", null);
-exports.TimeTableController = TimeTableController = __decorate([
-    (0, common_1.Controller)('time-table'),
-    __metadata("design:paramtypes", [time_table_service_1.TimeTableService])
-], TimeTableController);
-//# sourceMappingURL=time-table.controller.js.map
+], RecommendController.prototype, "uploadTranscript", null);
+exports.RecommendController = RecommendController = __decorate([
+    (0, common_1.Controller)('recommend'),
+    __metadata("design:paramtypes", [recommend_service_1.RecommendService,
+        course_service_1.CourseService])
+], RecommendController);
+//# sourceMappingURL=recommend.controller.js.map

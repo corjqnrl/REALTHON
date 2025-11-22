@@ -28,7 +28,6 @@ export class VectorService {
       queryEmbedding,
       3,
     );
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return results.map(([document]) => document);
   }
 
@@ -44,7 +43,6 @@ export class VectorService {
         type: targetType,
       } as Record<string, unknown>,
     );
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return results.map(([document]) => document);
   }
 }
