@@ -115,19 +115,19 @@ export class RecommendService {
       "courseId": "학수번호",
       "title": "과목명",
       "reason": "추천 이유",
-      "similarity": 0.95
+      "similarity": "유사도(0~1)"
     },
     {
       "courseId": "학수번호",
       "title": "과목명",
       "reason": "추천 이유",
-      "similarity": 0.95
+      "similarity": "유사도(0~1)"
     },
     {
       "courseId": "학수번호",
       "title": "과목명",
       "reason": "추천 이유",
-      "similarity": 0.95
+      "similarity": "유사도(0~1)"
     }
   ]
 }
