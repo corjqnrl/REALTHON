@@ -12,41 +12,50 @@ datasource db {
   provider = "postgresql"
 }
 
-model TimeTable {
-  id        Int       @id @default(autoincrement())
-  imageUrl  String
-  fileName  String
-  fileSize  Int
-  mimeType  String
-  lectures  Lecture[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+// =======================
+// Enums
+// =======================
+
+enum Semester {
+  S1 // 1학기
+  S2 // 2학기
+  SUMMER
+  WINTER
 }
 
-model Lecture {
-  id          Int          @id @default(autoincrement())
-  name        String
-  room        String
-  startTime   String? // 시작 시간 (예: "09:00")
-  endTime     String? // 종료 시간 (예: "10:30")
-  timeTableId Int
-  timeTable   TimeTable    @relation(fields: [timeTableId], references: [id], onDelete: Cascade)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  lectureDays LectureDay[]
+enum Grade {
+  A_PLUS
+  A
+  B_PLUS
+  B
+  C_PLUS
+  C
+  D_PLUS
+  D
+  F
+  P
 }
 
-enum days {
-  MONDAY
-  TUESDAY
-  WEDNESDAY
-  THURSDAY
-  FRIDAY
+// =======================
+// Academic structure
+// =======================
+
+model Department {
+  id     Int     @id @default(autoincrement())
+  code   String  @unique // e.g. "CSE"
+  nameKo String
+  nameEn String?
+
+  courses Course[]
 }
 
-model LectureDay {
-  id        Int     @id @default(autoincrement())
-  lecture   Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
-  lectureId Int
-  day       days
+model Course {
+  id           Int        @id @default(autoincrement())
+  departmentId Int
+  department   Department @relation(fields: [departmentId], references: [id])
+  courseCode   String // 학수번호 (e.g. "CS101")
+  title        String
+  grade        Grade
+
+  @@unique([departmentId, courseCode])
 }
