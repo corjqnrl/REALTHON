@@ -1,8 +1,7 @@
 import React from "react";
-import { Star } from "lucide-react";
 import resultsSectionStyles from "../styles/resultsSection.styles";
-import ReasonCard from "./ReasonCard";
 import { CourseRecommendation } from "../types";
+import ReasonCard from "./ReasonCard";
 
 interface CourseCardProps {
   course: CourseRecommendation;
@@ -33,22 +32,9 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, animationDelay }) => (
 
         <div className="flex items-center gap-2">
           <span className={resultsSectionStyles.similarityLabel}>유사도</span>
-          <div>
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                size={14}
-                className={
-                  i < Math.round(course.similarity * 5)
-                    ? resultsSectionStyles.starFilled
-                    : resultsSectionStyles.starEmpty
-                }
-              />
-            ))}
             <span className={resultsSectionStyles.similarityText}>
               {Math.round(course.similarity * 100)}%
             </span>
-          </div>
         </div>
       </div>
 
