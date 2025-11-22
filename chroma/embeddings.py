@@ -5,14 +5,24 @@ Converts text into embedding vectors for vector database search.
 
 import os
 from typing import List
+from pathlib import Path
 from openai import OpenAI
+from dotenv import load_dotenv
 
-# Try to import from config file, fallback to environment variable
-try:
-    import config
-    _default_api_key = getattr(config, 'OPENAI_API_KEY', None)
-except (ImportError, AttributeError):
-    _default_api_key = None
+# backend/.env 파일 경로 찾기
+# chroma 폴더에서 backend 폴더로 이동
+_chroma_dir = Path(__file__).parent
+_backend_dir = _chroma_dir.parent / "backend"
+_env_file = _backend_dir / ".env"
+
+# backend/.env 파일이 있으면 로드
+if _env_file.exists():
+    load_dotenv(_env_file)
+    print(f"Loaded .env from: {_env_file}")
+else:
+    # 없으면 현재 디렉토리나 상위 디렉토리에서 .env 찾기
+    load_dotenv()
+    print("Loaded .env from current or parent directory")
 
 
 def embedding(
@@ -37,7 +47,7 @@ def embedding(
         >>> print(len(embedding_vector))  # e.g., 1536 for ada-002
     """
     # Try config file first, then environment variable
-    api_key = _default_api_key or os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise ValueError("OPENAI_API_KEY not found in config file or environment variable")
     
