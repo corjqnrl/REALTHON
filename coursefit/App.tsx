@@ -1,11 +1,11 @@
-// App.tsx
 import React, { useState } from "react";
-import Sidebar from "./components/Sidebar";
+import Sidebar from "./sidebar/Sidebar";
 import UploadSection from "./components/UploadSection";
-import ResultsSection from "./components/ResultsSection";
+import ResultsSection from "./results/ResultsSection";
 import { AnalysisType, CourseRecommendation, HistoryItem } from "./types";
-import { postImage } from "./api/uploadImage"; // Gemini 분석 대신 REST API
+import { postImage } from "./api/uploadImage";
 import { Loader2, Sparkles } from "lucide-react";
+import appStyles from "./styles/app.styles";
 
 const App: React.FC = () => {
   const [analysisType, setAnalysisType] = useState<AnalysisType | null>(null);
@@ -15,8 +15,6 @@ const App: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [hasResults, setHasResults] = useState(false);
   const [userMajor, setUserMajor] = useState("");
-
-  // History 데이터/핸들러는 기존대로
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([
     {
       id: 1,
@@ -84,7 +82,6 @@ const App: React.FC = () => {
     },
   ]);
 
-  // ------ 수정된 부분: 이미지 URL 받아서 서버 분석 요청 ------
   const handleAnalyze = async (
     imageUrl: string,
     type: AnalysisType,
@@ -93,26 +90,19 @@ const App: React.FC = () => {
     setIsAnalyzing(true);
     setAnalysisType(type);
     setUserMajor(major);
-
     try {
-      // 서버에 이미지url 전달, 결과 받기 (기존 Gemini 대신)
       const response = await postImage({ imageurl: imageUrl.trim() });
-
-      // 서버 응답 (response.subjects) → 화면용 CourseRecommendation[] 매핑
       const results: CourseRecommendation[] = response.subjects.map(
         (subject) => ({
           courseName: subject.title,
-          courseCode: "", // 서버에 코드 추가시 매핑
-          credits: 3, // 서버에 있으면 사용, 없으면 기본값
-          rating: 4, // 서버에 있으면 사용, 없으면 기본값
+          courseCode: "",
+          credits: 3,
+          rating: 4,
           reason: subject.description,
         })
       );
-
       setRecommendations(results);
       setHasResults(true);
-
-      // 분석 성공 시 히스토리로 추가
       const newItem: HistoryItem = {
         id: Date.now(),
         title: `${type === AnalysisType.GENERAL ? "교양" : "전공"} 분석 결과`,
@@ -125,14 +115,13 @@ const App: React.FC = () => {
         recommendations: results,
       };
       setHistoryItems((prev) => [newItem, ...prev]);
-    } catch (err) {
+    } catch {
       alert("분석에 실패했습니다. 다시 시도해주세요.");
-      setAnalysisType(null); // Reset on error
+      setAnalysisType(null);
     } finally {
       setIsAnalyzing(false);
     }
   };
-  // -----------------------------------------------------------
 
   const handleReset = () => {
     setHasResults(false);
@@ -154,35 +143,29 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#F5F9FF] font-sans overflow-hidden">
-      {/* Sidebar */}
+    <div className={appStyles.container}>
       <Sidebar
         historyItems={historyItems}
         onNewAnalysis={handleReset}
         onHistorySelect={handleHistorySelect}
         onRenameHistoryItem={handleRenameHistoryItem}
       />
-
-      {/* Main Content */}
-      <main className="flex-1 h-full relative flex flex-col overflow-y-auto">
-        {/* Background Decor */}
-        <div className="fixed top-[-10%] right-[-5%] w-[600px] h-[600px] bg-blue-200/30 rounded-full blur-[100px] pointer-events-none"></div>
-        <div className="fixed bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-purple-200/30 rounded-full blur-[100px] pointer-events-none"></div>
-        <div className="fixed top-[20%] left-[15%] w-[400px] h-[400px] bg-yellow-100/40 rounded-full blur-[80px] pointer-events-none"></div>
-
-        {/* Content Container */}
-        <div className="flex-1 relative z-10 p-8 md:p-12 flex flex-col items-center min-h-min max-w-7xl mx-auto w-full">
+      <main className={appStyles.main}>
+        <div className={appStyles.bgBlueBlob}></div>
+        <div className={appStyles.bgPurpleBlob}></div>
+        <div className={appStyles.bgYellowBlob}></div>
+        <div className={appStyles.contentContainer}>
           {isAnalyzing ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-center animate-fade-in my-auto">
-              <div className="relative w-28 h-28 mb-8">
-                <div className="absolute inset-0 bg-blue-500 rounded-full blur-2xl opacity-20 animate-pulse-slow"></div>
-                <div className="relative bg-white w-full h-full rounded-[2rem] shadow-[0_0_40px_rgba(0,0,0,0.05)] border border-white flex items-center justify-center">
+            <div className={appStyles.analyzingWrapper}>
+              <div className={appStyles.analyzingBox}>
+                <div className={appStyles.analyzingPulse}></div>
+                <div className={appStyles.analyzingInnerBox}>
                   <Loader2
-                    className="w-12 h-12 text-black animate-spin"
+                    className={appStyles.analyzingSpinner}
                     strokeWidth={2}
                   />
                 </div>
-                <div className="absolute -top-3 -right-3 bg-black text-white p-2 rounded-full shadow-lg animate-bounce">
+                <div className={appStyles.analyzingBadge}>
                   <Sparkles
                     size={20}
                     fill="currentColor"
@@ -190,10 +173,8 @@ const App: React.FC = () => {
                   />
                 </div>
               </div>
-              <h3 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">
-                분석 중입니다...
-              </h3>
-              <p className="text-slate-500 font-medium text-lg">
+              <h3 className={appStyles.analyzingTitle}>분석 중입니다...</h3>
+              <p className={appStyles.analyzingDesc}>
                 {userMajor
                   ? `${userMajor} 전공자에게 딱 맞는`
                   : "나에게 딱 맞는"}{" "}
@@ -202,10 +183,9 @@ const App: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="w-full flex flex-col flex-grow justify-center">
+            <div className={appStyles.resultWrapper}>
               {!hasResults ? (
-                <div className="flex-grow flex items-center justify-center py-10">
-                  {/* 파일 대신 업로드 섹션에서 이미지URL/전공 등 전달 */}
+                <div className={appStyles.resultInnerWrapper}>
                   <UploadSection
                     onAnalyze={handleAnalyze}
                     isAnalyzing={isAnalyzing}
