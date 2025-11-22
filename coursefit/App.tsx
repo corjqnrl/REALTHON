@@ -99,7 +99,7 @@ const App: React.FC = () => {
           courseName: item.title,
           courseCode: item.courseId || "",
           credits: 3,
-          rating: 4,
+          similarity: item.similarity,
           reason: item.reason,
         })
       );

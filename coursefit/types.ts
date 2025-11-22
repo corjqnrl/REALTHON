@@ -7,8 +7,9 @@ export interface CourseRecommendation {
   courseName: string;
   courseCode: string;
   credits: number;
-  rating: number; // 1 to 5
+  similarity: number;
   reason: string;
+  
 }
 
 export interface AnalysisResult {
